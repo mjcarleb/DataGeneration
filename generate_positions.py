@@ -7,20 +7,20 @@ Goals:
 """
 Real firm positions:
 (1) Agree on attributes of position table
-    - a
-    - b
-    - c
+    - account
+    - security
+    - qty
     
 (2) For each attribute, define "distribution" valid values
-    - a
-    - b
-    - c
+    - account
+    - security
+    - qty
 """
 
 """
 Synthetic firm positions:
 (1) For each attribute, define "distribution" valid values
-    - a
-    - b
-    - c
+    - account
+    - security
+    - qty 
 """
