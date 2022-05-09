@@ -4,6 +4,84 @@ Goals:
 (2) Generate "real" market trades (10,000)
 (3) Generate "synthetic historical" breaks - with break assignment labels for training a DT model (1,000,000)
 """
+import pandas as pd
+import dask.dataframe as dd
+
+data_dir = "data/"
+
+# Create operational employee table
+ops_names = ["mary", "suzy", "tyrell",
+             "hasan", "vicky", "asad",
+             "monique", "gretchen", "trieu",
+             "greta", "mia", "dante",
+             "kareem", "amal", "anthony",
+             "suresh", "paula", "tiger",
+             "justin", "mirka", "julian",
+             "bianca", "sabine", "myles",
+             "mona", "bryce", "darnell",
+             "yui", "riku", "haruto",
+             "akari", "sakura", "william",
+             "ema", "mei", "david",
+             ]
+
+ops_emails = [f"{n}@email.com" for n in ops_names]
+
+ops_titles = ["manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              "manager", "analyst", "analyst",
+              ]
+
+ops_departments = ["sett_jam", "sett_jam", "sett_jam",
+                   "ca_lime", "ca_lime", "ca_lime",
+                   "lend_pie", "lend_pie", "lend_pie",
+                   "sett_jam", "sett_jam", "sett_jam",
+                   "ca_lime", "ca_lime", "ca_lime",
+                   "lend_pie", "lend_pie", "lend_pie",
+                   "sett_jam", "sett_jam", "sett_jam",
+                   "ca_lime", "ca_lime", "ca_lime",
+                   "lend_pie", "lend_pie", "lend_pie",
+                   "sett_jam", "sett_jam", "sett_jam",
+                   "ca_lime", "ca_lime", "ca_lime",
+                   "lend_pie", "lend_pie", "lend_pie",
+                   ]
+
+ops_regions = ["us", "us", "us",
+               "us", "us", "us",
+               "us", "us", "us",
+               "uk", "uk", "uk",
+               "uk", "uk", "uk",
+               "uk", "uk", "uk",
+               "eu", "eu", "eu",
+               "eu", "eu", "eu",
+               "eu", "eu", "eu",
+               "jpn", "jpn", "jpn",
+               "jpn", "jpn", "jpn",
+               "jpn", "jpn", "jpn",
+               ]
+
+
+ddf = dd.from_pandas(pd.DataFrame({"ops_names":ops_names,
+                                   "ops_emails": ops_emails,
+                                   "ops_titles": ops_titles,
+                                   "ops_departments": ops_departments,
+                                   "ops_regions":  ops_regions}),
+                     npartitions=2)
+
+ddf.to_parquet(path=f"{data_dir}ops_department")
+
+df = pd.read_parquet(path=f"{data_dir}ops_department")
+
+df.to_csv(f"{data_dir}test.csv")
+a=3
 
 """
 assume trade date: May 9, 2022
