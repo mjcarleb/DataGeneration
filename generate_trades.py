@@ -86,29 +86,67 @@ df = pd.read_parquet(path=f"{data_dir}ops_department")
 
 df.to_csv(f"{data_dir}test.csv")
 
+def create_trans_ref_dist(n_trans):
+
+    trans_ref_dist = [f"000000000{i}"[-10:] for i in range(n_trans)]
+    return trans_ref_dist
+
 def create_account_dist(n_trans):
 
     n_accounts = 250
     start_account = 0
     accounts = ["00000"+f"{int(acct)}"[-6:] for acct in range(start_account, start_account+n_accounts)]
-    accounts_prob = [80/50/100 if i < 50 else 20/200/100 for i in range(n_accounts)]
-    #accounts_prob[0] = 1 - np.array(accounts_prob[1:]).sum()
-    #assert np.array(accounts_prob).sum() == 100
-    accounts_dist = [np.random.choice(a=accounts, p=accounts_prob) for i in range(n_trans)]
+    prob = [80/50/100 if i < 50 else 20/200/100 for i in range(n_accounts)]
+    accounts_dist = [np.random.choice(a=accounts, p=prob) for i in range(n_trans)]
     return accounts_dist
+
+def create_security_id_dist(n_trans):
+
+    n_security_ids = 50
+    security_ids = []
+    for i in range(n_security_ids):
+        alpha = np.random.choice(["AA", "BB", "CC", "WW", "ZZ"])
+        numeric = f"000000{i}"[-7:]
+        security_ids.append(f"{alpha}-{numeric}")
+    prob = [80/10/100 if i < 10 else 20/40/100 for i in range(n_security_ids)]
+    security_ids_dist = [np.random.choice(a=security_ids, p=prob) for i in range(n_trans)]
+    return security_ids_dist
+
+def create_quantity_dist(n_trans):
+
+    quantity_dist = []
+    for i in range(n_trans):
+        p = np.random.sample()
+
+        if p < 0.1:
+            q = np.random.choice([20, 40, 60, 80, 100])
+
+        elif p < 0.25:
+            q = np.random.choice([100, 200, 300, 400, 500, 600, 700, 800, 900])
+
+        elif p < 0.5:
+            q = np.random.choice([1000, 1500, 2000, 2500, 5000, 6000, 7000, 7500, 8000, 9000])
+
+        elif p < 0.9:
+            q = np.random.choice([10000, 15000, 20000, 25000, 30000, 35000, 40000, 50000, 55000, 60000, 65000, 70000,
+                                  75000, 80000, 90000])
+        elif p < 1.0:
+            q = np.random.choice([100000, 150000, 200000, 250000])
+
+        quantity_dist.append(f"00000000000{q}"[-12:])
+
+    return quantity_dist
 
 
 #################################################
-# Create firm trades
+# Create distributions of each field in trade file
 #################################################
 n_trans = 10000
 
+create_trans_ref_dist(n_trans)
 create_account_dist(n_trans)
-
-for tran_ref in range (n_trans):
-    a=3
-
-    a=3
+create_security_id_dist(n_trans)
+create_quantity_dist(n_trans)
 
 """
 assume trade date: May 9, 2022
