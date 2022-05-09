@@ -104,13 +104,45 @@ def create_security_id_dist(n_trans):
 
     n_security_ids = 50
     security_ids = []
+    base_price_dict = dict()
+    base_price_curr_dict = dict()
     for i in range(n_security_ids):
         alpha = np.random.choice(["AA", "BB", "CC", "WW", "ZZ"])
         numeric = f"000000{i}"[-7:]
         security_ids.append(f"{alpha}-{numeric}")
+        base_price_usd = 100*np.random.sample()
+        base_price_curr = np.random.choice(["USD", "GBP", "EUR", "YEN"], p=[0.6, 0.1, 0.2, 0.1])
+        if base_price_curr == "USD":
+            base_price = base_price_usd
+        elif base_price_curr == "GBP":
+            base_price = base_price_usd * 0.81
+        elif base_price_curr == "EUR":
+            base_price = base_price_usd * 0.95
+        else:
+            base_price = base_price_usd * 130
+        base_price_dict[f"{alpha}-{numeric}"] = base_price
+        base_price_curr_dict[f"{alpha}-{numeric}"] = base_price_curr
+
     prob = [80/10/100 if i < 10 else 20/40/100 for i in range(n_security_ids)]
     security_ids_dist = [np.random.choice(a=security_ids, p=prob) for i in range(n_trans)]
-    return security_ids_dist
+
+    price_dist = []
+    price_currency_dist = []
+
+    for sec_id in security_ids_dist:
+
+        price_currency_dist.append(base_price_curr_dict[sec_id])
+        base_price = base_price_dict[sec_id]
+        p = np.random.sample()
+        change = max(0, np.random.normal(0.25, 0.1))
+        if p < 0.55:
+            price = f"{base_price + change :8.2f}"
+        else:
+            price = f"{base_price - change :8.2f}"
+
+        price_dist.append(price)
+
+    return security_ids_dist, price_dist, price_currency_dist
 
 def create_quantity_dist(n_trans):
 
@@ -137,16 +169,36 @@ def create_quantity_dist(n_trans):
 
     return quantity_dist
 
+def create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist):
+
+    trans_types = ["deliver free", "receive free", "deliver vs. payment", "receive vs. payment"]
+    trans_type_dist = [np.random.choice(trans_types, p=[0.1, 0.1, 0.4, 0.4]) for i in range(n_trans)]
+
+    amount_dist = []
+    amount_curr_dist = []
+    for i, tt in enumerate(trans_type_dist):
+        amount_curr_dist.append(price_currency_dist[i])
+        if (tt == trans_types[0]) or (tt == trans_types[1]):
+            amount_dist.append(f"0 :f12.2")
+        else:
+            amount_dist.append(f"{quantity_dist[i] * price_dist[i] :f12.2}")
+
+    return trans_type_dist, amount_dist, amount_curr_dist
+
 
 #################################################
 # Create distributions of each field in trade file
 #################################################
 n_trans = 10000
 
-create_trans_ref_dist(n_trans)
-create_account_dist(n_trans)
-create_security_id_dist(n_trans)
-create_quantity_dist(n_trans)
+trans_ref_dist = create_trans_ref_dist(n_trans)
+account_dist = create_account_dist(n_trans)
+security_id_dist, price_dist, price_currency_dist = create_security_id_dist(n_trans)
+quantity_dist = create_quantity_dist(n_trans)
+trans_type_dist, amount_dist, amount_curr_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+
+a=3
+
 
 """
 assume trade date: May 9, 2022
@@ -162,6 +214,7 @@ Real firm trades:
     - tran_type ("deliver free", "receive free", "deliver vs. payment", "receive vs. payment")
     - amount (0 for free, > 0 for payment)
     - amount_currency ("USD", "EUR", "GBP", "YEN")
+    
     - counter_party (4 digits)
     - participant_id (4 digits:  us(1234 or 5678), eu(1235), uk(), jpn())  - 8 particpants)
     - market (DTC, EC, CREST, JASDEC") - us implies US, CREST can GBP or Euro
