@@ -5,11 +5,15 @@ Goals:
 (3) Generate "synthetic historical" breaks - with break assignment labels for training a DT model (1,000,000)
 """
 import pandas as pd
+import numpy as np
 import dask.dataframe as dd
 
+np.random.seed(42)
 data_dir = "data/"
 
+#################################################
 # Create operational employee table
+#################################################
 ops_names = ["mary", "suzy", "tyrell",
              "hasan", "vicky", "asad",
              "monique", "gretchen", "trieu",
@@ -81,7 +85,30 @@ ddf.to_parquet(path=f"{data_dir}ops_department")
 df = pd.read_parquet(path=f"{data_dir}ops_department")
 
 df.to_csv(f"{data_dir}test.csv")
-a=3
+
+def create_account_dist(n_trans):
+
+    n_accounts = 250
+    start_account = 0
+    accounts = ["00000"+f"{int(acct)}"[-6:] for acct in range(start_account, start_account+n_accounts)]
+    accounts_prob = [80/50/100 if i < 50 else 20/200/100 for i in range(n_accounts)]
+    #accounts_prob[0] = 1 - np.array(accounts_prob[1:]).sum()
+    #assert np.array(accounts_prob).sum() == 100
+    accounts_dist = [np.random.choice(a=accounts, p=accounts_prob) for i in range(n_trans)]
+    return accounts_dist
+
+
+#################################################
+# Create firm trades
+#################################################
+n_trans = 10000
+
+create_account_dist(n_trans)
+
+for tran_ref in range (n_trans):
+    a=3
+
+    a=3
 
 """
 assume trade date: May 9, 2022
