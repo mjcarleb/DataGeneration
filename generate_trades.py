@@ -128,6 +128,7 @@ def create_security_id_dist(n_trans):
 
     price_dist = []
     price_currency_dist = []
+    sanctioned_security_dist = []
 
     for sec_id in security_ids_dist:
 
@@ -142,7 +143,12 @@ def create_security_id_dist(n_trans):
 
         price_dist.append(price)
 
-    return security_ids_dist, price_dist, price_currency_dist
+        if (sec_id == security_ids[-1]) or (sec_id == security_ids[-2]):
+            sanctioned_security_dist.append("sanctioned security")
+        else:
+            sanctioned_security_dist.append("not sanctioned security")
+
+    return security_ids_dist, price_dist, price_currency_dist, sanctioned_security_dist
 
 def create_quantity_dist(n_trans):
 
@@ -179,9 +185,9 @@ def create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_di
     for i, tt in enumerate(trans_type_dist):
         amount_curr_dist.append(price_currency_dist[i])
         if (tt == trans_types[0]) or (tt == trans_types[1]):
-            amount_dist.append(f"0 :f12.2")
+            amount_dist.append(f"{0 :12.2f}")
         else:
-            amount_dist.append(f"{quantity_dist[i] * price_dist[i] :f12.2}")
+            amount_dist.append(f"{float(quantity_dist[i]) * float(price_dist[i]) :12.2f}")
 
     return trans_type_dist, amount_dist, amount_curr_dist
 
@@ -193,7 +199,7 @@ n_trans = 10000
 
 trans_ref_dist = create_trans_ref_dist(n_trans)
 account_dist = create_account_dist(n_trans)
-security_id_dist, price_dist, price_currency_dist = create_security_id_dist(n_trans)
+security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
 quantity_dist = create_quantity_dist(n_trans)
 trans_type_dist, amount_dist, amount_curr_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
 
