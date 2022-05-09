@@ -1,8 +1,8 @@
 """
 Goals:
-(1) Generate "real" firm trades
-(2) Generate "real" street trades
-(3) Generate "synthetic" firm trades - with labels for training
+(1) Generate "real" firm trades  (10,000)
+(2) Generate "real" street trades (100,000)
+(3) Generate "synthetic" firm trades - with labels for training  (1,000,000)
 """
 
 """

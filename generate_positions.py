@@ -1,7 +1,8 @@
 """
 Goals:
-(1) Generate "real" firm positions
-(2) Generate "synthetic" firm positions
+(1) Generate "real" firm positions  (1,000)
+(2) Generate "real" street positions (10,000)
+(3) Generate "synthetic" positions???
 """
 
 """
@@ -10,17 +11,26 @@ Real firm positions:
     - account
     - security
     - qty
-    
+
+
 (2) For each attribute, define "distribution" valid values
-    - account
-    - security
-    - qty
+    - a
+    - b
+    - c
 """
 
 """
-Synthetic firm positions:
+Real street positions:
 (1) For each attribute, define "distribution" valid values
-    - account
-    - security
-    - qty 
+    - a
+    - b
+    - c
+"""
+
+"""
+Synthetic positions:
+(1) For each attribute, define "distribution" valid values
+    - a
+    - b
+    - c
 """
