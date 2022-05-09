@@ -191,6 +191,20 @@ def create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_di
 
     return trans_type_dist, amount_dist, amount_curr_dist
 
+def create_market_dist(price_currency_dist):
+    market_dist = []
+    for pc in price_currency_dist:
+
+        if pc == "YEN":
+            market_dist.append("JASDEC")
+        elif pc == "USD":
+            market_dist.append("DTC")
+        elif pc == "GBP":
+            market_dist.append("CREST")
+        elif pc == "EUR":
+            market_dist.append(np.random.choice(["EC", "CREST"], p=[0.8, 0.2]))
+
+    return market_dist
 
 #################################################
 # Create distributions of each field in trade file
@@ -202,7 +216,7 @@ account_dist = create_account_dist(n_trans)
 security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
 quantity_dist = create_quantity_dist(n_trans)
 trans_type_dist, amount_dist, amount_curr_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
-
+market_dist = create_market_dist(price_currency_dist)
 a=3
 
 
@@ -220,10 +234,10 @@ Real firm trades:
     - tran_type ("deliver free", "receive free", "deliver vs. payment", "receive vs. payment")
     - amount (0 for free, > 0 for payment)
     - amount_currency ("USD", "EUR", "GBP", "YEN")
-    
-    - counter_party (4 digits)
-    - participant_id (4 digits:  us(1234 or 5678), eu(1235), uk(), jpn())  - 8 particpants)
     - market (DTC, EC, CREST, JASDEC") - us implies US, CREST can GBP or Euro
+
+    - counter_party (4 digits)    
+    - participant_id (4 digits:  us(1234 or 5678), eu(1235), uk(), jpn())  - 8 particpants)
     - sd (YYYY-MM-DD)
     - actual_sd (YYYY-MM-DD)
     - source_system ("sett-jam", "ca-lime", "lend-pie")
