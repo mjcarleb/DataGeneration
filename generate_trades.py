@@ -140,7 +140,10 @@ def create_security_id_dist(n_trans):
         if p < 0.55:
             price = f"{base_price + change :8.2f}"
         else:
-            price = f"{base_price - change :8.2f}"
+            if change < base_price:
+                price = f"{base_price - change :8.2f}"
+            else:
+                price = f"{base_price :8.2f}"
 
         price_dist.append(price)
 
@@ -186,9 +189,11 @@ def create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_di
     for i, tt in enumerate(trans_type_dist):
         amount_curr_dist.append(price_currency_dist[i])
         if (tt == trans_types[0]) or (tt == trans_types[1]):
-            amount_dist.append(f"{0 :12.2f}")
+            amount_dist.append("00000000000.00")
         else:
-            amount_dist.append(f"{float(quantity_dist[i]) * float(price_dist[i]) :12.2f}")
+            amount = float(quantity_dist[i]) * float(price_dist[i])
+            amount_str = f"{amount :0.2f}"
+            amount_dist.append(f"0000000000000{amount_str}"[-14:])
 
     return trans_type_dist, amount_dist, amount_curr_dist
 
@@ -296,6 +301,28 @@ def create_user_id_dist(source_system_ref_dist, market_dist):
 
     return user_id_dist
 
+def create_index(n_trans, account_dist, security_id_dist, quantity_dist,
+                 trans_type_dist, amount_dist, amount_curr_dist,
+                 market_dist, counter_party_dist, settle_date_dist,
+                 participant_dist):
+
+    idx = []
+    for i in range(n_trans):
+        new_element = f"{account_dist[i]}|" + \
+                      f"{security_id_dist[i]}|" + \
+                      f"{quantity_dist[i]}|" + \
+                      f"{trans_type_dist[i]}|" + \
+                      f"{amount_dist[i]}|" + \
+                      f"{amount_curr_dist[i]}|" + \
+                      f"{market_dist[i]}|" + \
+                      f"{counter_party_dist[i]}|" + \
+                      f"{settle_date_dist[i]}|" + \
+                      f"{participant_dist[i]}"
+
+        idx.append(new_element)
+    return idx
+
+
 #################################################
 # Create distributions of each field in trade file
 #################################################
@@ -311,9 +338,13 @@ counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
 settle_date_dist = ["2022-05-11" for i in range(n_trans)]
 actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
 source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
-trade_date_dist = ["settled" for i in range(n_trans)]
+trade_status_dist = ["settled" for i in range(n_trans)]
 user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
 
+idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
+                   trans_type_dist, amount_dist, amount_curr_dist,
+                   market_dist, counter_party_dist, settle_date_dist,
+                   participant_dist)
 
 ddf = dd.from_pandas(pd.DataFrame({
     "trans_ref": trans_ref_dist,
@@ -333,8 +364,8 @@ ddf = dd.from_pandas(pd.DataFrame({
     "actual_settle_date": actual_settle_date_dist,
     "source_system": source_system_dist,
     "source_system_ref": source_system_ref_dist,
-    "trade_date": trade_date_dist,
-    "user_id": user_id_dist}, index=trans_ref_dist),
+    "trade_status": trade_status_dist,
+    "user_id": user_id_dist}, index=idx),
     npartitions=2)
 
 
