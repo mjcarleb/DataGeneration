@@ -239,18 +239,6 @@ def create_counter_party_dist(market_dist):
 
     return counter_party_dist, participant_dist
 
-def create_settlement_date_dist(n_trans):
-
-    settle_date_dist = []
-    actual_settle_date_dist = []
-
-    for i in range(n_trans):
-
-        settle_date_dist.append("2022-05-11")
-        actual_settle_date_dist.append("2022-05-11")
-
-    return settle_date_dist, actual_settle_date_dist
-
 
 def create_source_system_dist(market_dist):
 
@@ -300,7 +288,38 @@ def create_source_system_dist(market_dist):
     return source_system_dist, source_system_ref_dist
 
 
+def create_user_id_dist(source_system_ref_dist):
 
+    user_id_dist = []
+
+    sys_id_stem = "99999"
+
+    people_id_stems = dict()
+    people_id_stems["s_us"] = ops_emails[:3]
+    people_id_stems["c_us"] = ops_emails[3:6]
+    people_id_stems["l_us"] = ops_emails[6:9]
+    people_id_stems["s_uk"] = ops_emails[9:12]
+    people_id_stems["c_uk"] = ops_emails[12:15]
+    people_id_stems["l_uk"] = ops_emails[15:18]
+    people_id_stems["s_ec"] = ops_emails[18:21]
+    people_id_stems["c_ec"] = ops_emails[21:24]
+    people_id_stems["l_ec"] = ops_emails[24:27]
+    people_id_stems["s_jp"] = ops_emails[27:30]
+    people_id_stems["c_jp"] = ops_emails[30:33]
+    people_id_stems["l_jp"] = ops_emails[33:36]
+
+
+    for ss_ref in source_system_ref_dist:
+
+        p = np.random.sample()
+
+        if p < 0.9:
+            user_id_dist.append(ss_ref[:4]+"_"+sys_id_stem)
+        else:
+            user_id_dist.append(np.random.choice(people_id_stems[ss_ref[:4]], p=[0.2, 0.4, 0.4]))
+            a=3
+
+    return user_id_dist
 
 #################################################
 # Create distributions of each field in trade file
@@ -314,8 +333,11 @@ quantity_dist = create_quantity_dist(n_trans)
 trans_type_dist, amount_dist, amount_curr_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
 market_dist = create_market_dist(price_currency_dist)
 counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
-settle_date_dist, actual_settle_date_dist = create_settlement_date_dist(n_trans)
+settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
 source_system_dist, source_system_ref_dist = create_source_system_dist(market_dist)
+trade_date_dist = ["settled" for i in range(n_trans)]
+user_id_dist = create_user_id_dist(source_system_ref_dist)
 a=3
 
 
@@ -340,7 +362,6 @@ Real firm trades:
     - actual_sd (YYYY-MM-DD)
     - source_system ("sett-jam", "ca-lime", "lend-pie")
     - source_system_ref s+9     c+7     l+8
-    -
     - trade_state:  verified, unverified, pending, settled, cancelled
     - userid:  s+     c+    l+   [system userid 5 digits.......or 5 letters for people....."s_39878" or "mcarl"]
     
