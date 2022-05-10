@@ -206,6 +206,102 @@ def create_market_dist(price_currency_dist):
 
     return market_dist
 
+
+def create_counter_party_dist(market_dist):
+
+    counter_party_dist = []
+    participant_dist = []
+
+    for market in market_dist:
+
+        us_cp = ["2340", "2341", "2342", "2343", "2344", "2345", "2346", "2347", "2348", "2349"]
+        ec_cp = ["3340", "3341", "3342", "3343", "3344", "3345", "3346", "3347", "3348", "3349"]
+        uk_cp = ["4340", "4341", "4342", "4433", "4344", "4345", "4346", "4347", "4348", "4349"]
+        jp_cp = ["5340", "5341", "5342", "5343", "5344", "5345", "5346", "5347", "5348", "5349"]
+
+        us_part = ["1111", "9111"]
+        ec_part = ["1222", "9222"]
+        uk_part = ["1333", "9333"]
+        jp_part = ["1444", "9444"]
+
+        if market == "DTC":
+            counter_party_dist.append(np.random.choice(us_cp))
+            participant_dist.append(np.random.choice(us_part))
+        elif market == "EC":
+            counter_party_dist.append(np.random.choice(ec_cp))
+            participant_dist.append(np.random.choice(ec_part))
+        elif market == "CREST":
+            counter_party_dist.append(np.random.choice(uk_cp))
+            participant_dist.append(np.random.choice(uk_part))
+        else:
+            counter_party_dist.append(np.random.choice(jp_cp))
+            participant_dist.append(np.random.choice(jp_part))
+
+    return counter_party_dist, participant_dist
+
+def create_settlement_date_dist(n_trans):
+
+    settle_date_dist = []
+    actual_settle_date_dist = []
+
+    for i in range(n_trans):
+
+        settle_date_dist.append("2022-05-11")
+        actual_settle_date_dist.append("2022-05-11")
+
+    return settle_date_dist, actual_settle_date_dist
+
+
+def create_source_system_dist(market_dist):
+
+    source_system_dist = []
+    source_system_ref_dist = []
+
+    us_sys = ["sett_jam_us", "ca_lime_us", "lend_pie_us"]
+    ec_sys = ["sett_jam_ec", "ca_lime_ec", "lend_pie_ec"]
+    uk_sys = ["sett_jam_uk", "ca_lime_uk", "lend_pie_uk"]
+    jp_sys = ["sett_jam_jp", "ca_lime_jp", "lend_pie_jp"]
+
+    last_ids = dict()
+    for sys in us_sys + ec_sys + uk_sys + jp_sys:
+        last_ids[sys] = 0
+
+    for market in market_dist:
+
+        if market == "DTC":
+            sys_chosen = np.random.choice(us_sys, p=[0.5, 0.2, 0.3])
+            source_system_dist.append(sys_chosen)
+            last_id = last_ids[sys_chosen]
+            last_id_str = f"00000000{last_id}"[-9:]
+            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
+            last_ids[sys_chosen] += 1
+        elif market == "EC":
+            sys_chosen = np.random.choice(ec_sys, p=[0.5, 0.2, 0.3])
+            source_system_dist.append(sys_chosen)
+            last_id = last_ids[sys_chosen]
+            last_id_str = f"000000{last_id}"[-7:]
+            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
+            last_ids[sys_chosen] += 1
+        elif market == "UK":
+            sys_chosen = np.random.choice(uk_sys, p=[0.5, 0.2, 0.3])
+            source_system_dist.append(sys_chosen)
+            last_id = last_ids[sys_chosen]
+            last_id_str = f"0000000{last_id}"[-8:]
+            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
+            last_ids[sys_chosen] += 1
+        else:
+            sys_chosen = np.random.choice(jp_sys, p=[0.5, 0.2, 0.3])
+            source_system_dist.append(sys_chosen)
+            last_id = last_ids[sys_chosen]
+            last_id_str = f"000000000{last_id}"[-10:]
+            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
+            last_ids[sys_chosen] += 1
+
+    return source_system_dist, source_system_ref_dist
+
+
+
+
 #################################################
 # Create distributions of each field in trade file
 #################################################
@@ -217,6 +313,9 @@ security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = cr
 quantity_dist = create_quantity_dist(n_trans)
 trans_type_dist, amount_dist, amount_curr_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
 market_dist = create_market_dist(price_currency_dist)
+counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
+settle_date_dist, actual_settle_date_dist = create_settlement_date_dist(n_trans)
+source_system_dist, source_system_ref_dist = create_source_system_dist(market_dist)
 a=3
 
 
@@ -235,13 +334,13 @@ Real firm trades:
     - amount (0 for free, > 0 for payment)
     - amount_currency ("USD", "EUR", "GBP", "YEN")
     - market (DTC, EC, CREST, JASDEC") - us implies US, CREST can GBP or Euro
-
     - counter_party (4 digits)    
     - participant_id (4 digits:  us(1234 or 5678), eu(1235), uk(), jpn())  - 8 particpants)
     - sd (YYYY-MM-DD)
     - actual_sd (YYYY-MM-DD)
     - source_system ("sett-jam", "ca-lime", "lend-pie")
     - source_system_ref s+9     c+7     l+8
+    -
     - trade_state:  verified, unverified, pending, settled, cancelled
     - userid:  s+     c+    l+   [system userid 5 digits.......or 5 letters for people....."s_39878" or "mcarl"]
     
