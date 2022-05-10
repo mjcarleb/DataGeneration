@@ -77,14 +77,15 @@ ddf = dd.from_pandas(pd.DataFrame({"ops_names":ops_names,
                                    "ops_emails": ops_emails,
                                    "ops_titles": ops_titles,
                                    "ops_departments": ops_departments,
-                                   "ops_regions":  ops_regions}),
+                                   "ops_regions":  ops_regions},
+                                  index=ops_emails),
                      npartitions=2)
 
 ddf.to_parquet(path=f"{data_dir}ops_department")
 
 df = pd.read_parquet(path=f"{data_dir}ops_department")
 
-df.to_csv(f"{data_dir}test.csv")
+df.to_csv(f"{data_dir}ops_department.csv")
 
 def create_trans_ref_dist(n_trans):
 
@@ -240,84 +241,58 @@ def create_counter_party_dist(market_dist):
     return counter_party_dist, participant_dist
 
 
-def create_source_system_dist(market_dist):
+def create_source_system_dist(n_trans):
 
     source_system_dist = []
     source_system_ref_dist = []
 
-    us_sys = ["sett_jam_us", "ca_lime_us", "lend_pie_us"]
-    ec_sys = ["sett_jam_ec", "ca_lime_ec", "lend_pie_ec"]
-    uk_sys = ["sett_jam_uk", "ca_lime_uk", "lend_pie_uk"]
-    jp_sys = ["sett_jam_jp", "ca_lime_jp", "lend_pie_jp"]
+    systems = ["sett_jam", "ca_lime", "lend_pie"]
 
     last_ids = dict()
-    for sys in us_sys + ec_sys + uk_sys + jp_sys:
+    for sys in systems:
         last_ids[sys] = 0
 
-    for market in market_dist:
+    for i in range(n_trans):
 
-        if market == "DTC":
-            sys_chosen = np.random.choice(us_sys, p=[0.5, 0.2, 0.3])
-            source_system_dist.append(sys_chosen)
-            last_id = last_ids[sys_chosen]
-            last_id_str = f"00000000{last_id}"[-9:]
-            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
-            last_ids[sys_chosen] += 1
-        elif market == "EC":
-            sys_chosen = np.random.choice(ec_sys, p=[0.5, 0.2, 0.3])
-            source_system_dist.append(sys_chosen)
-            last_id = last_ids[sys_chosen]
-            last_id_str = f"000000{last_id}"[-7:]
-            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
-            last_ids[sys_chosen] += 1
-        elif market == "UK":
-            sys_chosen = np.random.choice(uk_sys, p=[0.5, 0.2, 0.3])
-            source_system_dist.append(sys_chosen)
-            last_id = last_ids[sys_chosen]
-            last_id_str = f"0000000{last_id}"[-8:]
-            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
-            last_ids[sys_chosen] += 1
-        else:
-            sys_chosen = np.random.choice(jp_sys, p=[0.5, 0.2, 0.3])
-            source_system_dist.append(sys_chosen)
-            last_id = last_ids[sys_chosen]
-            last_id_str = f"000000000{last_id}"[-10:]
-            source_system_ref_dist.append(f"{sys_chosen[:1]}_{sys_chosen[-2:]}_{last_id_str}")
-            last_ids[sys_chosen] += 1
+        sys_chosen = np.random.choice(systems, p=[0.5, 0.2, 0.3])
+        source_system_dist.append(sys_chosen)
+        last_id = last_ids[sys_chosen]
+        last_id_str = f"00000000000{last_id}"[-12:]
+        source_system_ref_dist.append(f"{sys_chosen[:1]}_{last_id_str}")
+        last_ids[sys_chosen] += 1
 
     return source_system_dist, source_system_ref_dist
 
 
-def create_user_id_dist(source_system_ref_dist):
+def create_user_id_dist(source_system_ref_dist, market_dist):
 
     user_id_dist = []
 
     sys_id_stem = "99999"
 
     people_id_stems = dict()
-    people_id_stems["s_us"] = ops_emails[:3]
-    people_id_stems["c_us"] = ops_emails[3:6]
-    people_id_stems["l_us"] = ops_emails[6:9]
-    people_id_stems["s_uk"] = ops_emails[9:12]
-    people_id_stems["c_uk"] = ops_emails[12:15]
-    people_id_stems["l_uk"] = ops_emails[15:18]
-    people_id_stems["s_ec"] = ops_emails[18:21]
-    people_id_stems["c_ec"] = ops_emails[21:24]
-    people_id_stems["l_ec"] = ops_emails[24:27]
-    people_id_stems["s_jp"] = ops_emails[27:30]
-    people_id_stems["c_jp"] = ops_emails[30:33]
-    people_id_stems["l_jp"] = ops_emails[33:36]
+    people_id_stems["s_DTC"] = ops_emails[:3]
+    people_id_stems["c_DTC"] = ops_emails[3:6]
+    people_id_stems["l_DTC"] = ops_emails[6:9]
+    people_id_stems["s_CREST"] = ops_emails[9:12]
+    people_id_stems["c_CREST"] = ops_emails[12:15]
+    people_id_stems["l_CREST"] = ops_emails[15:18]
+    people_id_stems["s_EC"] = ops_emails[18:21]
+    people_id_stems["c_EC"] = ops_emails[21:24]
+    people_id_stems["l_EC"] = ops_emails[24:27]
+    people_id_stems["s_JASDEC"] = ops_emails[27:30]
+    people_id_stems["c_JASDEC"] = ops_emails[30:33]
+    people_id_stems["l_JASDEC"] = ops_emails[33:36]
 
 
-    for ss_ref in source_system_ref_dist:
+    for i, ss_ref in enumerate(source_system_ref_dist):
 
         p = np.random.sample()
 
         if p < 0.9:
-            user_id_dist.append(ss_ref[:4]+"_"+sys_id_stem)
+            user_id_dist.append(ss_ref[:1]+"_"+sys_id_stem)
         else:
-            user_id_dist.append(np.random.choice(people_id_stems[ss_ref[:4]], p=[0.2, 0.4, 0.4]))
-            a=3
+            user_id_dist.append(np.random.choice(people_id_stems[f"{ss_ref[:1]}_{market_dist[i]}"], p=[0.2, 0.4, 0.4]))
 
     return user_id_dist
 
@@ -335,10 +310,40 @@ market_dist = create_market_dist(price_currency_dist)
 counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
 settle_date_dist = ["2022-05-11" for i in range(n_trans)]
 actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
-source_system_dist, source_system_ref_dist = create_source_system_dist(market_dist)
+source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
 trade_date_dist = ["settled" for i in range(n_trans)]
-user_id_dist = create_user_id_dist(source_system_ref_dist)
-a=3
+user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
+
+
+ddf = dd.from_pandas(pd.DataFrame({
+    "trans_ref": trans_ref_dist,
+    "account": account_dist,
+    "security_id": security_id_dist,
+    "price": price_dist,
+    "price_currency": price_currency_dist,
+    "sanctioned_security": sanctioned_security_dist,
+    "quantity": quantity_dist,
+    "trans_type": trans_type_dist,
+    "amount": amount_dist,
+    "amount_currency": amount_curr_dist,
+    "market": market_dist,
+    "counter_party": counter_party_dist,
+    "participant": participant_dist,
+    "settle_date": settle_date_dist,
+    "actual_settle_date": actual_settle_date_dist,
+    "source_system": source_system_dist,
+    "source_system_ref": source_system_ref_dist,
+    "trade_date": trade_date_dist,
+    "user_id": user_id_dist}, index=trans_ref_dist),
+    npartitions=2)
+
+
+ddf.to_parquet(path=f"{data_dir}ideal_trades")
+
+df = pd.read_parquet(path=f"{data_dir}ideal_trades")
+
+df.to_csv(f"{data_dir}ideal_trades.csv")
+
 
 
 """
@@ -349,6 +354,7 @@ Real firm trades:
     - tran_ref (e.g., 10 digit number)
     - account_number (e.g., 6 digit)
     - security_id (e.g., 2 alpha + 7 numeric)
+    - sactioned
     - quantity (only positive, integer)
     - price (all positive, xx.xx double)
     - price_currency (see below...assume same as amount currency)
@@ -377,6 +383,7 @@ Real firm trades:
     - tran_type ("deliver free", "receive free", "deliver vs. payment", "receive vs. payment") [10,10,40,40]
     - amount (0 for free, > 0 for payment)    20 / 80
     - amount_currency ("USD", "EUR", "GBP")   60, 20, 20
+    - market
     - counter_party (4 digits)    10 per market......even participation  (excluding 2 more:  1234, 5678)
     - participant_id (4 digits:  1234 or 5678)   50/50   mandatory
     - sd (YYYY-MM-DD)   + 2 days May 11
