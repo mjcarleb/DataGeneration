@@ -313,7 +313,7 @@ def create_index(n_trans, account_dist, security_id_dist, quantity_dist,
                       f"{quantity_dist[i]}|" + \
                       f"{trans_type_dist[i]}|" + \
                       f"{amount_dist[i]}|" + \
-                      f"{amount_curr_dist[i]}|" + \
+                      f"{amount_currency_dist[i]}|" + \
                       f"{market_dist[i]}|" + \
                       f"{counter_party_dist[i]}|" + \
                       f"{settle_date_dist[i]}|" + \
@@ -332,7 +332,7 @@ trans_ref_dist = create_trans_ref_dist(n_trans)
 account_dist = create_account_dist(n_trans)
 security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
 quantity_dist = create_quantity_dist(n_trans)
-trans_type_dist, amount_dist, amount_curr_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
 market_dist = create_market_dist(price_currency_dist)
 counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
 settle_date_dist = ["2022-05-11" for i in range(n_trans)]
@@ -342,7 +342,7 @@ trade_status_dist = ["settled" for i in range(n_trans)]
 user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
 
 idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
-                   trans_type_dist, amount_dist, amount_curr_dist,
+                   trans_type_dist, amount_dist, amount_currency_dist,
                    market_dist, counter_party_dist, settle_date_dist,
                    participant_dist)
 
@@ -356,7 +356,7 @@ ddf = dd.from_pandas(pd.DataFrame({
     "quantity": quantity_dist,
     "trans_type": trans_type_dist,
     "amount": amount_dist,
-    "amount_currency": amount_curr_dist,
+    "amount_currency": amount_currency_dist,
     "market": market_dist,
     "counter_party": counter_party_dist,
     "participant": participant_dist,
