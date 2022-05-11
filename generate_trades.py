@@ -323,59 +323,205 @@ def create_index(n_trans, account_dist, security_id_dist, quantity_dist,
     return idx
 
 
+
 #################################################
 # Create distributions of each field in trade file
 #################################################
-n_trans = 10000
+if __name__ == "__main__":
+    n_trans = 100
 
-trans_ref_dist = create_trans_ref_dist(n_trans)
-account_dist = create_account_dist(n_trans)
-security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
-quantity_dist = create_quantity_dist(n_trans)
-trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
-market_dist = create_market_dist(price_currency_dist)
-counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
-settle_date_dist = ["2022-05-11" for i in range(n_trans)]
-actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
-source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
-trade_status_dist = ["settled" for i in range(n_trans)]
-user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
+    np.random.seed(42)
+    trans_ref_dist = create_trans_ref_dist(n_trans)
+    account_dist = create_account_dist(n_trans)
+    security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
+    quantity_dist = create_quantity_dist(n_trans)
+    trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    market_dist = create_market_dist(price_currency_dist)
+    counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
+    settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
+    trade_status_dist = ["settled" for i in range(n_trans)]
+    user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
+    ledger_dist = ["ideal_ledger" for i in range(n_trans)]
+    matched_dist = ["" for i in range(n_trans)]
+    idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
+                       trans_type_dist, amount_dist, amount_currency_dist,
+                       market_dist, counter_party_dist, settle_date_dist,
+                       participant_dist)
+    file_name = "ideal_trades"
+    ddf = dd.from_pandas(pd.DataFrame({
+        "trans_ref": trans_ref_dist,
+        "account": account_dist,
+        "security_id": security_id_dist,
+        "price": price_dist,
+        "price_currency": price_currency_dist,
+        "sanctioned_security": sanctioned_security_dist,
+        "quantity": quantity_dist,
+        "trans_type": trans_type_dist,
+        "amount": amount_dist,
+        "amount_currency": amount_currency_dist,
+        "market": market_dist,
+        "counter_party": counter_party_dist,
+        "participant": participant_dist,
+        "settle_date": settle_date_dist,
+        "actual_settle_date": actual_settle_date_dist,
+        "source_system": source_system_dist,
+        "source_system_ref": source_system_ref_dist,
+        "trade_status": trade_status_dist,
+        "user_id": user_id_dist,
+        "ledger":  ledger_dist,
+        "matched":  matched_dist}, index=idx),
+        npartitions=2)
+    ddf.to_parquet(path=f"{data_dir}{file_name}")
+    df = pd.read_parquet(path=f"{data_dir}{file_name}")
+    df.to_csv(f"{data_dir}{file_name}.csv")
 
-idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
-                   trans_type_dist, amount_dist, amount_currency_dist,
-                   market_dist, counter_party_dist, settle_date_dist,
-                   participant_dist)
-
-ddf = dd.from_pandas(pd.DataFrame({
-    "trans_ref": trans_ref_dist,
-    "account": account_dist,
-    "security_id": security_id_dist,
-    "price": price_dist,
-    "price_currency": price_currency_dist,
-    "sanctioned_security": sanctioned_security_dist,
-    "quantity": quantity_dist,
-    "trans_type": trans_type_dist,
-    "amount": amount_dist,
-    "amount_currency": amount_currency_dist,
-    "market": market_dist,
-    "counter_party": counter_party_dist,
-    "participant": participant_dist,
-    "settle_date": settle_date_dist,
-    "actual_settle_date": actual_settle_date_dist,
-    "source_system": source_system_dist,
-    "source_system_ref": source_system_ref_dist,
-    "trade_status": trade_status_dist,
-    "user_id": user_id_dist}, index=idx),
-    npartitions=2)
 
 
-ddf.to_parquet(path=f"{data_dir}ideal_trades")
 
-df = pd.read_parquet(path=f"{data_dir}ideal_trades")
+    np.random.seed(42)
+    trans_ref_dist = create_trans_ref_dist(n_trans)
+    account_dist = create_account_dist(n_trans)
+    security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
+    quantity_dist = create_quantity_dist(n_trans)
+    trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    market_dist = create_market_dist(price_currency_dist)
+    counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
+    settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
+    trade_status_dist = ["settled" for i in range(n_trans)]
+    user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
+    ledger_dist = ["ideal_ledger" for i in range(n_trans)]
+    matched_dist = ["" for i in range(n_trans)]
+    idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
+                       trans_type_dist, amount_dist, amount_currency_dist,
+                       market_dist, counter_party_dist, settle_date_dist,
+                       participant_dist)
+    file_name = "firm_trades"
+    item_nums = [0,1]
+    for item_num in item_nums:
+        trans_ref_dist.pop(item_num)
+        account_dist.pop(item_num)
+        security_id_dist.pop(item_num)
+        price_dist.pop(item_num)
+        price_currency_dist.pop(item_num)
+        sanctioned_security_dist.pop(item_num)
+        quantity_dist.pop(item_num)
+        trans_type_dist.pop(item_num)
+        amount_dist.pop(item_num)
+        amount_currency_dist.pop(item_num)
+        market_dist.pop(item_num)
+        counter_party_dist.pop(item_num)
+        participant_dist.pop(item_num)
+        settle_date_dist.pop(item_num)
+        actual_settle_date_dist.pop(item_num)
+        source_system_dist.pop(item_num)
+        source_system_ref_dist.pop(item_num)
+        trade_status_dist.pop(item_num)
+        user_id_dist.pop(item_num)
+        ledger_dist.pop(item_num)
+        matched_dist.pop(item_num)
+        idx.pop(item_num)
+    ddf = dd.from_pandas(pd.DataFrame({
+        "trans_ref": trans_ref_dist,
+        "account": account_dist,
+        "security_id": security_id_dist,
+        "price": price_dist,
+        "price_currency": price_currency_dist,
+        "sanctioned_security": sanctioned_security_dist,
+        "quantity": quantity_dist,
+        "trans_type": trans_type_dist,
+        "amount": amount_dist,
+        "amount_currency": amount_currency_dist,
+        "market": market_dist,
+        "counter_party": counter_party_dist,
+        "participant": participant_dist,
+        "settle_date": settle_date_dist,
+        "actual_settle_date": actual_settle_date_dist,
+        "source_system": source_system_dist,
+        "source_system_ref": source_system_ref_dist,
+        "trade_status": trade_status_dist,
+        "user_id": user_id_dist,
+        "ledger":  ledger_dist,
+        "matched":  matched_dist}, index=idx),
+        npartitions=2)
+    ddf.to_parquet(path=f"{data_dir}{file_name}")
+    df = pd.read_parquet(path=f"{data_dir}{file_name}")
+    df.to_csv(f"{data_dir}{file_name}.csv")
 
-df.to_csv(f"{data_dir}ideal_trades.csv")
 
-
+    np.random.seed(42)
+    trans_ref_dist = create_trans_ref_dist(n_trans)
+    account_dist = create_account_dist(n_trans)
+    security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
+    quantity_dist = create_quantity_dist(n_trans)
+    trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    market_dist = create_market_dist(price_currency_dist)
+    counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
+    settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
+    trade_status_dist = ["settled" for i in range(n_trans)]
+    user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
+    ledger_dist = ["ideal_ledger" for i in range(n_trans)]
+    matched_dist = ["" for i in range(n_trans)]
+    idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
+                       trans_type_dist, amount_dist, amount_currency_dist,
+                       market_dist, counter_party_dist, settle_date_dist,
+                       participant_dist)
+    file_name = "street_trades"
+    item_nums = [-1,-2]
+    for item_num in item_nums:
+        trans_ref_dist.pop(item_num)
+        account_dist.pop(item_num)
+        security_id_dist.pop(item_num)
+        price_dist.pop(item_num)
+        price_currency_dist.pop(item_num)
+        sanctioned_security_dist.pop(item_num)
+        quantity_dist.pop(item_num)
+        trans_type_dist.pop(item_num)
+        amount_dist.pop(item_num)
+        amount_currency_dist.pop(item_num)
+        market_dist.pop(item_num)
+        counter_party_dist.pop(item_num)
+        participant_dist.pop(item_num)
+        settle_date_dist.pop(item_num)
+        actual_settle_date_dist.pop(item_num)
+        source_system_dist.pop(item_num)
+        source_system_ref_dist.pop(item_num)
+        trade_status_dist.pop(item_num)
+        user_id_dist.pop(item_num)
+        ledger_dist.pop(item_num)
+        matched_dist.pop(item_num)
+        idx.pop(item_num)
+    ddf = dd.from_pandas(pd.DataFrame({
+        "trans_ref": trans_ref_dist,
+        "account": account_dist,
+        "security_id": security_id_dist,
+        "price": price_dist,
+        "price_currency": price_currency_dist,
+        "sanctioned_security": sanctioned_security_dist,
+        "quantity": quantity_dist,
+        "trans_type": trans_type_dist,
+        "amount": amount_dist,
+        "amount_currency": amount_currency_dist,
+        "market": market_dist,
+        "counter_party": counter_party_dist,
+        "participant": participant_dist,
+        "settle_date": settle_date_dist,
+        "actual_settle_date": actual_settle_date_dist,
+        "source_system": source_system_dist,
+        "source_system_ref": source_system_ref_dist,
+        "trade_status": trade_status_dist,
+        "user_id": user_id_dist,
+        "ledger":  ledger_dist,
+        "matched":  matched_dist}, index=idx),
+        npartitions=2)
+    ddf.to_parquet(path=f"{data_dir}{file_name}")
+    df = pd.read_parquet(path=f"{data_dir}{file_name}")
+    df.to_csv(f"{data_dir}{file_name}.csv")
 
 """
 assume trade date: May 9, 2022
