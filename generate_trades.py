@@ -393,7 +393,7 @@ if __name__ == "__main__":
     source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
     trade_status_dist = ["settled" for i in range(n_trans)]
     user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
-    ledger_dist = ["ideal_ledger" for i in range(n_trans)]
+    ledger_dist = ["firm_ledger" for i in range(n_trans)]
     matched_dist = ["" for i in range(n_trans)]
     idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
                        trans_type_dist, amount_dist, amount_currency_dist,
@@ -465,7 +465,7 @@ if __name__ == "__main__":
     source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
     trade_status_dist = ["settled" for i in range(n_trans)]
     user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
-    ledger_dist = ["ideal_ledger" for i in range(n_trans)]
+    ledger_dist = ["street_ledger" for i in range(n_trans)]
     matched_dist = ["" for i in range(n_trans)]
     idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
                        trans_type_dist, amount_dist, amount_currency_dist,
