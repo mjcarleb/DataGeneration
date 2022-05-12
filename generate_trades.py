@@ -61,12 +61,12 @@ ops_departments = ["sett_jam", "sett_jam", "sett_jam",
 ops_regions = ["us", "us", "us",
                "us", "us", "us",
                "us", "us", "us",
-               "uk", "uk", "uk",
-               "uk", "uk", "uk",
-               "uk", "uk", "uk",
                "eu", "eu", "eu",
                "eu", "eu", "eu",
                "eu", "eu", "eu",
+               "uk", "uk", "uk",
+               "uk", "uk", "uk",
+               "uk", "uk", "uk",
                "jpn", "jpn", "jpn",
                "jpn", "jpn", "jpn",
                "jpn", "jpn", "jpn",
@@ -87,6 +87,9 @@ df = pd.read_parquet(path=f"{data_dir}ops_department")
 
 df.to_csv(f"{data_dir}ops_department.csv")
 
+################################################
+#         FUNCTIONS
+################################################
 def create_trans_ref_dist(n_trans):
 
     trans_ref_dist = [f"000000000{i}"[-10:] for i in range(n_trans)]
@@ -323,13 +326,33 @@ def create_index(n_trans, account_dist, security_id_dist, quantity_dist,
     return idx
 
 
+def create_resolver_label(market_dist, source_system_dist):
 
-#################################################
-# Create distributions of each field in trade file
-#################################################
+    resolver_label = []
+    resolvers = dict()
+
+    # left-right order by system sett, ca, lend
+    systems = ["sett_jam", "ca_lime", "lend_pie"]
+    resolvers["DTC"] = [ops_emails[0], ops_emails[3], ops_emails[6]]
+    resolvers["EC"] = [ops_emails[9], ops_emails[12], ops_emails[15]]
+    resolvers["CREST"] = [ops_emails[18], ops_emails[21], ops_emails[24]]
+    resolvers["JASDEC"] = [ops_emails[27], ops_emails[30], ops_emails[33]]
+
+    for i, market in enumerate(market_dist):
+
+        ss = source_system_dist[i]
+        ss_idx = systems.index(ss)
+        resolver_label.append(resolvers[market][ss_idx])
+        a=3
+
+    return resolver_label
+
 if __name__ == "__main__":
-    n_trans = 100
 
+    ###################################################
+    #      CREATE IDEAL TRADES
+    ###################################################
+    n_trans = 100
     np.random.seed(42)
     trans_ref_dist = create_trans_ref_dist(n_trans)
     account_dist = create_account_dist(n_trans)
@@ -377,9 +400,10 @@ if __name__ == "__main__":
     df = pd.read_parquet(path=f"{data_dir}{file_name}")
     df.to_csv(f"{data_dir}{file_name}.csv")
 
-
-
-
+    ###################################################
+    #      CREATE FIRM TRADES
+    ###################################################
+    n_trans = 100
     np.random.seed(42)
     trans_ref_dist = create_trans_ref_dist(n_trans)
     account_dist = create_account_dist(n_trans)
@@ -452,6 +476,10 @@ if __name__ == "__main__":
     df.to_csv(f"{data_dir}{file_name}.csv")
 
 
+    ###################################################
+    #      CREATE STREET TRADES
+    ###################################################
+    n_trans = 100
     np.random.seed(42)
     trans_ref_dist = create_trans_ref_dist(n_trans)
     account_dist = create_account_dist(n_trans)
@@ -518,6 +546,60 @@ if __name__ == "__main__":
         "user_id": user_id_dist,
         "ledger":  ledger_dist,
         "matched":  matched_dist}, index=idx),
+        npartitions=2)
+    ddf.to_parquet(path=f"{data_dir}{file_name}")
+    df = pd.read_parquet(path=f"{data_dir}{file_name}")
+    df.to_csv(f"{data_dir}{file_name}.csv")
+
+
+    ###################################################
+    #      CREATE TRAINING TRADES
+    ###################################################
+    n_trans = 100000
+    np.random.seed(52)
+    trans_ref_dist = create_trans_ref_dist(n_trans)
+    account_dist = create_account_dist(n_trans)
+    security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
+    quantity_dist = create_quantity_dist(n_trans)
+    trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    market_dist = create_market_dist(price_currency_dist)
+    counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
+    settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    actual_settle_date_dist = ["2022-05-11" for i in range(n_trans)]
+    source_system_dist, source_system_ref_dist = create_source_system_dist(n_trans)
+    trade_status_dist = ["settled" for i in range(n_trans)]
+    user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
+    ledger_dist = ["firm_ledger" for i in range(n_trans)]
+    matched_dist = ["" for i in range(n_trans)]
+    resolver_label = create_resolver_label(market_dist, source_system_dist)
+    idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
+                       trans_type_dist, amount_dist, amount_currency_dist,
+                       market_dist, counter_party_dist, settle_date_dist,
+                       participant_dist)
+    file_name = "training_trades"
+    ddf = dd.from_pandas(pd.DataFrame({
+        "trans_ref": trans_ref_dist,
+        "account": account_dist,
+        "security_id": security_id_dist,
+        "price": price_dist,
+        "price_currency": price_currency_dist,
+        "sanctioned_security": sanctioned_security_dist,
+        "quantity": quantity_dist,
+        "trans_type": trans_type_dist,
+        "amount": amount_dist,
+        "amount_currency": amount_currency_dist,
+        "market": market_dist,
+        "counter_party": counter_party_dist,
+        "participant": participant_dist,
+        "settle_date": settle_date_dist,
+        "actual_settle_date": actual_settle_date_dist,
+        "source_system": source_system_dist,
+        "source_system_ref": source_system_ref_dist,
+        "trade_status": trade_status_dist,
+        "user_id": user_id_dist,
+        "ledger":  ledger_dist,
+        "matched":  matched_dist,
+        "resolver_label": resolver_label}, index=idx),
         npartitions=2)
     ddf.to_parquet(path=f"{data_dir}{file_name}")
     df = pd.read_parquet(path=f"{data_dir}{file_name}")
