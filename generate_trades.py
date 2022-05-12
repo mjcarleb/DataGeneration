@@ -302,7 +302,7 @@ def create_user_id_dist(source_system_ref_dist, market_dist):
     return user_id_dist
 
 def create_index(n_trans, account_dist, security_id_dist, quantity_dist,
-                 trans_type_dist, amount_dist, amount_curr_dist,
+                 trans_type_dist, amount_dist, amount_currency_dist,
                  market_dist, counter_party_dist, settle_date_dist,
                  participant_dist):
 
@@ -400,7 +400,7 @@ if __name__ == "__main__":
                        market_dist, counter_party_dist, settle_date_dist,
                        participant_dist)
     file_name = "firm_trades"
-    item_nums = [0,1]
+    item_nums = [0,0]
     for item_num in item_nums:
         trans_ref_dist.pop(item_num)
         account_dist.pop(item_num)
@@ -472,7 +472,7 @@ if __name__ == "__main__":
                        market_dist, counter_party_dist, settle_date_dist,
                        participant_dist)
     file_name = "street_trades"
-    item_nums = [-1,-2]
+    item_nums = [-1,-1]
     for item_num in item_nums:
         trans_ref_dist.pop(item_num)
         account_dist.pop(item_num)
