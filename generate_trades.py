@@ -115,7 +115,7 @@ def create_security_id_dist(n_trans):
         numeric = f"000000{i}"[-7:]
         security_ids.append(f"{alpha}-{numeric}")
         base_price_usd = 100*np.random.sample()
-        base_price_curr = np.random.choice(["USD", "GBP", "EUR", "YEN"], p=[0.6, 0.1, 0.2, 0.1])
+        base_price_curr = np.random.choice(["USD", "GBP", "EUR", "JPY"], p=[0.6, 0.1, 0.2, 0.1])
         if base_price_curr == "USD":
             base_price = base_price_usd
         elif base_price_curr == "GBP":
@@ -207,7 +207,7 @@ def create_market_dist(price_currency_dist):
     market_dist = []
     for pc in price_currency_dist:
 
-        if pc == "YEN":
+        if pc == "JPY":
             market_dist.append("JASDEC")
         elif pc == "USD":
             market_dist.append("DTC")
@@ -353,6 +353,29 @@ def create_resolver_label(market_dist, source_system_dist, sanctioned_security_d
     return resolver_label
 
 
+def create_amount_USD_dist(amount_dist, amount_currency_dist):
+
+    amount_USD_dist = []
+
+    convert_multiplier = dict()
+    convert_multiplier["USD"] = 1
+    convert_multiplier["EUR"] = 0.96
+    convert_multiplier["GBP"] = 0.82
+    convert_multiplier["JPY"] = 128.11
+
+    for i, amount in enumerate(amount_dist):
+
+        amt = float(amount)
+
+        amt_usd = amt * convert_multiplier[amount_currency_dist[i]]
+
+        amount_usd = f"0000000000000{amt_usd}"[-14:]
+
+        amount_USD_dist.append(amount_usd)
+
+    return amount_USD_dist
+
+
 if __name__ == "__main__":
 
     ###################################################
@@ -365,6 +388,7 @@ if __name__ == "__main__":
     security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
     quantity_dist = create_quantity_dist(n_trans)
     trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    amount_USD_dist = create_amount_USD_dist(amount_dist, amount_currency_dist)
     market_dist = create_market_dist(price_currency_dist)
     counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
     settle_date_dist = ["2022-05-11" for i in range(n_trans)]
@@ -390,6 +414,7 @@ if __name__ == "__main__":
         "trans_type": trans_type_dist,
         "amount": amount_dist,
         "amount_currency": amount_currency_dist,
+        "amount_USD":  amount_USD_dist,
         "market": market_dist,
         "counter_party": counter_party_dist,
         "participant": participant_dist,
@@ -416,6 +441,7 @@ if __name__ == "__main__":
     security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
     quantity_dist = create_quantity_dist(n_trans)
     trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    amount_USD_dist = create_amount_USD_dist(amount_dist, amount_currency_dist)
     market_dist = create_market_dist(price_currency_dist)
     counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
     settle_date_dist = ["2022-05-11" for i in range(n_trans)]
@@ -442,6 +468,7 @@ if __name__ == "__main__":
         trans_type_dist.pop(item_num)
         amount_dist.pop(item_num)
         amount_currency_dist.pop(item_num)
+        amount_USD_dist.pop(item_num)
         market_dist.pop(item_num)
         counter_party_dist.pop(item_num)
         participant_dist.pop(item_num)
@@ -465,6 +492,7 @@ if __name__ == "__main__":
         "trans_type": trans_type_dist,
         "amount": amount_dist,
         "amount_currency": amount_currency_dist,
+        "amount_USD":  amount_USD_dist,
         "market": market_dist,
         "counter_party": counter_party_dist,
         "participant": participant_dist,
@@ -492,6 +520,7 @@ if __name__ == "__main__":
     security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
     quantity_dist = create_quantity_dist(n_trans)
     trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    amount_USD_dist = create_amount_USD_dist(amount_dist, amount_currency_dist)
     market_dist = create_market_dist(price_currency_dist)
     counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
     settle_date_dist = ["2022-05-11" for i in range(n_trans)]
@@ -518,6 +547,7 @@ if __name__ == "__main__":
         trans_type_dist.pop(item_num)
         amount_dist.pop(item_num)
         amount_currency_dist.pop(item_num)
+        amount_USD_dist.pop(item_num)
         market_dist.pop(item_num)
         counter_party_dist.pop(item_num)
         participant_dist.pop(item_num)
@@ -541,6 +571,7 @@ if __name__ == "__main__":
         "trans_type": trans_type_dist,
         "amount": amount_dist,
         "amount_currency": amount_currency_dist,
+        "amount_USD":  amount_USD_dist,
         "market": market_dist,
         "counter_party": counter_party_dist,
         "participant": participant_dist,
@@ -569,6 +600,7 @@ if __name__ == "__main__":
     security_id_dist, price_dist, price_currency_dist, sanctioned_security_dist = create_security_id_dist(n_trans)
     quantity_dist = create_quantity_dist(n_trans)
     trans_type_dist, amount_dist, amount_currency_dist = create_trans_type_dist(n_trans, price_dist, price_currency_dist, quantity_dist)
+    amount_USD_dist = create_amount_USD_dist(amount_dist, amount_currency_dist)
     market_dist = create_market_dist(price_currency_dist)
     counter_party_dist, participant_dist = create_counter_party_dist(market_dist)
     settle_date_dist = ["2022-05-11" for i in range(n_trans)]
@@ -595,6 +627,7 @@ if __name__ == "__main__":
         "trans_type": trans_type_dist,
         "amount": amount_dist,
         "amount_currency": amount_currency_dist,
+        "amount_USD":  amount_USD_dist,
         "market": market_dist,
         "counter_party": counter_party_dist,
         "participant": participant_dist,
@@ -626,7 +659,7 @@ Real firm trades:
     - price_currency (see below...assume same as amount currency)
     - tran_type ("deliver free", "receive free", "deliver vs. payment", "receive vs. payment")
     - amount (0 for free, > 0 for payment)
-    - amount_currency ("USD", "EUR", "GBP", "YEN")
+    - amount_currency ("USD", "EUR", "GBP", "JPY")
     - market (DTC, EC, CREST, JASDEC") - us implies US, CREST can GBP or Euro
     - counter_party (4 digits)    
     - participant_id (4 digits:  us(1234 or 5678), eu(1235), uk(), jpn())  - 8 particpants)
