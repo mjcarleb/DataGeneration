@@ -150,7 +150,8 @@ def create_security_id_dist(n_trans):
 
         price_dist.append(price)
 
-        if (sec_id == security_ids[-1]) or (sec_id == security_ids[-2]):
+        p = np.random.sample()
+        if p < 0.02:
             sanctioned_security_dist.append("sanctioned security")
         else:
             sanctioned_security_dist.append("not sanctioned security")
@@ -325,8 +326,7 @@ def create_index(n_trans, account_dist, security_id_dist, quantity_dist,
         idx.append(new_element)
     return idx
 
-
-def create_resolver_label(market_dist, source_system_dist):
+def create_resolver_label(market_dist, source_system_dist, sanctioned_security_dist):
 
     resolver_label = []
     resolvers = dict()
@@ -339,13 +339,17 @@ def create_resolver_label(market_dist, source_system_dist):
     resolvers["JASDEC"] = [ops_emails[27], ops_emails[30], ops_emails[33]]
 
     for i, market in enumerate(market_dist):
-
         ss = source_system_dist[i]
         ss_idx = systems.index(ss)
-        resolver_label.append(resolvers[market][ss_idx])
-        a=3
+        if sanctioned_security_dist[i] == "not sanctioned security":
+            resolver_label.append(resolvers[market][ss_idx])
+        else:
+            resolver_label.append("global_compliance@email.com")
+
+
 
     return resolver_label
+
 
 if __name__ == "__main__":
 
@@ -555,6 +559,7 @@ if __name__ == "__main__":
     ###################################################
     #      CREATE TRAINING TRADES
     ###################################################
+
     n_trans = 100000
     np.random.seed(52)
     trans_ref_dist = create_trans_ref_dist(n_trans)
@@ -571,7 +576,7 @@ if __name__ == "__main__":
     user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
     ledger_dist = ["firm_ledger" for i in range(n_trans)]
     matched_dist = ["" for i in range(n_trans)]
-    resolver_label = create_resolver_label(market_dist, source_system_dist)
+    resolver_label = create_resolver_label(market_dist, source_system_dist, sanctioned_security_dist)
     idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
                        trans_type_dist, amount_dist, amount_currency_dist,
                        market_dist, counter_party_dist, settle_date_dist,
