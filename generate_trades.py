@@ -134,7 +134,7 @@ def create_security_id_dist(n_trans):
     price_currency_dist = []
     sanctioned_security_dist = []
 
-    for sec_id in security_ids_dist:
+    for i, sec_id in enumerate(security_ids_dist):
 
         price_currency_dist.append(base_price_curr_dict[sec_id])
         base_price = base_price_dict[sec_id]
@@ -151,7 +151,9 @@ def create_security_id_dist(n_trans):
         price_dist.append(price)
 
         p = np.random.sample()
-        if p < 0.02:
+        if i == 0:
+            sanctioned_security_dist.append("sanctioned security")  # force so that I see one of these with break
+        elif p < 0.02:
             sanctioned_security_dist.append("sanctioned security")
         else:
             sanctioned_security_dist.append("not sanctioned security")
