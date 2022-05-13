@@ -344,7 +344,7 @@ def create_resolver_label(market_dist, source_system_dist, sanctioned_security_d
         ss = source_system_dist[i]
         ss_idx = systems.index(ss)
         if (sanctioned_security_dist[i] == "sanctioned security") and \
-                (float(amount_USD_dist[i]) > 250000):
+                (float(amount_USD_dist[i]) > 25000):
             resolver_label.append("global_compliance@email.com")
         else:
             resolver_label.append(resolvers[market][ss_idx])
@@ -367,8 +367,9 @@ def create_amount_USD_dist(amount_dist, amount_currency_dist):
         amt = float(amount)
 
         amt_usd = amt * convert_multiplier[amount_currency_dist[i]]
+        amt_usd_str = f"{amt_usd :0.2f}"
 
-        amount_usd = f"0000000000000{amt_usd}"[-14:]
+        amount_usd = f"0000000000000{amt_usd_str}"[-14:]
 
         amount_USD_dist.append(amount_usd)
 
