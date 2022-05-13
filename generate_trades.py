@@ -328,7 +328,7 @@ def create_index(n_trans, account_dist, security_id_dist, quantity_dist,
         idx.append(new_element)
     return idx
 
-def create_resolver_label(market_dist, source_system_dist, sanctioned_security_dist):
+def create_resolver_label(market_dist, source_system_dist, sanctioned_security_dist, amount_USD_dist):
 
     resolver_label = []
     resolvers = dict()
@@ -343,12 +343,11 @@ def create_resolver_label(market_dist, source_system_dist, sanctioned_security_d
     for i, market in enumerate(market_dist):
         ss = source_system_dist[i]
         ss_idx = systems.index(ss)
-        if sanctioned_security_dist[i] == "not sanctioned security":
-            resolver_label.append(resolvers[market][ss_idx])
-        else:
+        if (sanctioned_security_dist[i] == "sanctioned security") and \
+                (float(amount_USD_dist[i]) > 250000):
             resolver_label.append("global_compliance@email.com")
-
-
+        else:
+            resolver_label.append(resolvers[market][ss_idx])
 
     return resolver_label
 
@@ -610,7 +609,7 @@ if __name__ == "__main__":
     user_id_dist = create_user_id_dist(source_system_ref_dist, market_dist)
     ledger_dist = ["firm_ledger" for i in range(n_trans)]
     matched_dist = ["" for i in range(n_trans)]
-    resolver_label = create_resolver_label(market_dist, source_system_dist, sanctioned_security_dist)
+    resolver_label = create_resolver_label(market_dist, source_system_dist, sanctioned_security_dist, amount_USD_dist)
     idx = create_index(n_trans, account_dist, security_id_dist, quantity_dist,
                        trans_type_dist, amount_dist, amount_currency_dist,
                        market_dist, counter_party_dist, settle_date_dist,
